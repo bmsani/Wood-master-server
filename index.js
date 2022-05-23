@@ -12,10 +12,31 @@ app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.urnhu.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+function verifyJWT(req, res, next){
+    const authHeader = req.header.authorization;
+    if(!authHeader){
+        return res.status(401).send({message: 'Unauthorized access'})
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN, function(err, decoded){
+        if(err){
+            return res.status(403).send({message: 'Forbidden Access'})
+        }
+        req.decoded = decoded;
+        next();
+    })
+}
+
 async function run() {
     try {
         await client.connect();
         const userCollection = client.db('wood_master').collection('users');
+
+        app.get('/user', async (req,res) => {
+            const users = await userCollection.find().toArray();
+            res.send(users)
+        })
 
         app.put('/user/:email', async (req,res) => {
             const email = req.params.email;
