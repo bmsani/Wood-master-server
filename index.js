@@ -33,6 +33,7 @@ async function run() {
     try {
         await client.connect();
         const userCollection = client.db('wood_master').collection('users');
+        const productCollection = client.db('wood_master').collection('products');
 
         const verifyAdmin = async (req, res, next) => {
             const requester = req.decoded.email;
@@ -59,7 +60,7 @@ async function run() {
                 $set: user,
             }
             const result = await userCollection.updateOne(filter,updateDoc,options);
-            const token = jwt.sign({email:email}, process.env.ACCESS_TOKEN, {expiresIn: '1h'})
+            const token = jwt.sign({email:email}, process.env.ACCESS_TOKEN, {expiresIn: '1d'})
             res.send({result,token});
         });
 
@@ -77,6 +78,12 @@ async function run() {
                 $set:{role: 'admin'},
             };
             const result = await userCollection.updateOne(filter,updateUser);
+            res.send(result);
+        })
+    
+        app.post('/product', async (req, res) =>{
+            const product = req.body;
+            const result = await productCollection.insertOne(product);
             res.send(result);
         })
     }
