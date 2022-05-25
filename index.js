@@ -51,6 +51,18 @@ async function run() {
             res.send(users)
         })
 
+        app.get('/singleUser', async (req,res) => {
+            const email = req.query.email;
+            const query = {email: email}
+            const user = await userCollection.find(query).toArray()
+            res.send(user);
+        })
+
+        app.get('/product', async (req, res) => {
+            const products = await productCollection.find().toArray();
+            res.send(products);
+        })
+
         app.put('/user/:email', async (req,res) => {
             const email = req.params.email;
             const user = req.body;
@@ -62,6 +74,18 @@ async function run() {
             const result = await userCollection.updateOne(filter,updateDoc,options);
             const token = jwt.sign({email:email}, process.env.ACCESS_TOKEN, {expiresIn: '1d'})
             res.send({result,token});
+        });
+
+        app.put('/singleUser/:email', async (req,res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const filter = {email: email};
+            const options = {upsert : true};
+            const updateDoc = {
+                $set: user,
+            }
+            const result = await userCollection.updateOne(filter,updateDoc,options);
+            res.send(result);
         });
 
         app.get('/admin/:email', async(req,res) => {
