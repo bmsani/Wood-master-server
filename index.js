@@ -53,7 +53,8 @@ async function run() {
             res.send(users)
         })
 
-        app.get('/singleUser', async (req,res) => {
+        // passed
+        app.get('/singleUser', verifyJWT, async (req,res) => {
             const email = req.query.email;
             const query = {email: email}
             const user = await userCollection.find(query).toArray()
@@ -78,7 +79,8 @@ async function run() {
             res.send({result,token});
         });
 
-        app.put('/singleUser/:email', async (req,res) => {
+        // passed
+        app.put('/singleUser/:email',verifyJWT, async (req,res) => {
             const email = req.params.email;
             const user = req.body;
             const filter = {email: email};
@@ -90,13 +92,15 @@ async function run() {
             res.send(result);
         });
 
-        app.get('/admin/:email', async(req,res) => {
+        // passed
+        app.get('/admin/:email', verifyJWT, verifyAdmin, async(req,res) => {
             const email = req.params.email;
             const user = await userCollection.findOne({email: email});
             const isAdmin = user.role === 'admin';
             res.send({admin: isAdmin});
         })
 
+        // passed
         app.put('/user/admin/:email', verifyJWT, verifyAdmin, async (req, res) =>{
             const email = req.params.email;
             const filter = {email: email};
@@ -107,7 +111,8 @@ async function run() {
             res.send(result);
         })
     
-        app.put('/order/:id', async (req, res) =>{
+        // passed
+        app.put('/order/:id', verifyJWT, verifyAdmin, async (req, res) =>{
             const id = req.params.id;
             const status = req.body;
             const query = { _id: ObjectId(id) };
@@ -119,19 +124,22 @@ async function run() {
             res.send(result);
         })
     
-        app.post('/product', async (req, res) =>{
+        // passed
+        app.post('/product', verifyJWT, verifyAdmin, async (req, res) =>{
             const product = req.body;
             const result = await productCollection.insertOne(product);
             res.send(result);
         })
 
-        app.post('/order', async (req, res) =>{
+        // passed
+        app.post('/order', verifyJWT, async (req, res) =>{
             const order = req.body;
             const result = await orderCollection.insertOne(order);
             res.send(result);
         })
         
-        app.put('/product/:id', async (req, res) => {
+        // passed
+        app.put('/product/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const newQuantity= req.body;
             const query = { _id: ObjectId(id) }
@@ -146,7 +154,8 @@ async function run() {
 
         })
 
-        app.post('/review', async (req, res) =>{
+        // passed
+        app.post('/review',verifyJWT, async (req, res) =>{
             const review = req.body;
             const result = await reviewCollection.insertOne(review);
             res.send(result);
@@ -157,40 +166,46 @@ async function run() {
             res.send(review);
         })
 
+        //passed
         app.get('/order', async (req, res) => {
             const order = await orderCollection.find().toArray();
             res.send(order);
         })
 
-        app.get('/order', async (req, res) => {
+        // passed
+        app.get('/order', verifyJWT, verifyAdmin, async (req, res) => {
             const email = req.query.email
             const query = {email: email}
             const orders = await orderCollection.find(query).toArray();
             res.send(orders);
         })
 
-        app.delete('/product/:id', async (req, res) => {
+        // passed
+        app.delete('/product/:id', verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
             const result = await productCollection.deleteOne(query);
             res.send(result);
         })
 
-        app.delete('/order/:id', async (req, res) => {
+        // passed
+        app.delete('/order/:id', verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
             const result = await orderCollection.deleteOne(query);
             res.send(result);
         })
 
-        app.get('/singleProduct/:id', async (req,res) => {
+        // passed
+        app.get('/singleProduct/:id', verifyJWT, async (req,res) => {
             const id = req.params.id;
             const query = {_id: ObjectId(id)};
             const result = await productCollection.findOne(query);
             res.send(result)
         })
 
-        app.get('/order/:id', async (req,res) => {
+        // passed
+        app.get('/order/:id', verifyJWT, async (req,res) => {
             const id = req.params.id;
             const query = {_id: ObjectId(id)};
             const result = await orderCollection.findOne(query);
