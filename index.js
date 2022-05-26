@@ -35,6 +35,7 @@ async function run() {
         const userCollection = client.db('wood_master').collection('users');
         const productCollection = client.db('wood_master').collection('products');
         const reviewCollection = client.db('wood_master').collection('reviews');
+        const orderCollection = client.db('wood_master').collection('orders');
 
         const verifyAdmin = async (req, res, next) => {
             const requester = req.decoded.email;
@@ -111,21 +112,27 @@ async function run() {
             const result = await productCollection.insertOne(product);
             res.send(result);
         })
-        
-        // app.put('/product/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const newQuantity= req.body;
-        //     const query = { _id: ObjectId(id) }
-        //     const options = {upsert : true};
-        //     const updateQuantity = {
-        //         $set:{
-        //             availableQuantity: newQuantity.availableQuantity
-        //         },
-        //     };
-        //     const result = await productCollection.updateOne(query,updateQuantity,options);
-        //     res.send({result, newQuantity});
 
-        // })
+        app.post('/order', async (req, res) =>{
+            const order = req.body;
+            const result = await orderCollection.insertOne(order);
+            res.send(result);
+        })
+        
+        app.put('/product/:id', async (req, res) => {
+            const id = req.params.id;
+            const newQuantity= req.body;
+            const query = { _id: ObjectId(id) }
+            const options = {upsert : true};
+            const updateQuantity = {
+                $set:{
+                    availableQuantity: newQuantity.availableQuantity
+                },
+            };
+            const result = await productCollection.updateOne(query,updateQuantity,options);
+            res.send(result);
+
+        })
 
         app.post('/review', async (req, res) =>{
             const review = req.body;
@@ -149,6 +156,13 @@ async function run() {
             const id = req.params.id;
             const query = {_id: ObjectId(id)};
             const result = await productCollection.findOne(query);
+            res.send(result)
+        })
+
+        app.get('/order/:id', async (req,res) => {
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result = await orderCollection.findOne(query);
             res.send(result)
         })
     }
