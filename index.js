@@ -107,6 +107,18 @@ async function run() {
             res.send(result);
         })
     
+        app.put('/order/:id', async (req, res) =>{
+            const id = req.params.id;
+            const status = req.body;
+            const query = { _id: ObjectId(id) };
+            const options = {upsert: true};
+            const updateProduct = {
+                $set:status,
+            };
+            const result = await orderCollection.updateOne(query,updateProduct,options);
+            res.send(result);
+        })
+    
         app.post('/product', async (req, res) =>{
             const product = req.body;
             const result = await productCollection.insertOne(product);
@@ -145,10 +157,29 @@ async function run() {
             res.send(review);
         })
 
+        app.get('/order', async (req, res) => {
+            const order = await orderCollection.find().toArray();
+            res.send(order);
+        })
+
+        app.get('/order', async (req, res) => {
+            const email = req.query.email
+            const query = {email: email}
+            const orders = await orderCollection.find(query).toArray();
+            res.send(orders);
+        })
+
         app.delete('/product/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
             const result = await productCollection.deleteOne(query);
+            res.send(result);
+        })
+
+        app.delete('/order/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await orderCollection.deleteOne(query);
             res.send(result);
         })
 
