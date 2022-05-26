@@ -34,6 +34,7 @@ async function run() {
         await client.connect();
         const userCollection = client.db('wood_master').collection('users');
         const productCollection = client.db('wood_master').collection('products');
+        const reviewCollection = client.db('wood_master').collection('reviews');
 
         const verifyAdmin = async (req, res, next) => {
             const requester = req.decoded.email;
@@ -109,6 +110,32 @@ async function run() {
             const product = req.body;
             const result = await productCollection.insertOne(product);
             res.send(result);
+        })
+        
+        // app.put('/product/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     const newQuantity= req.body;
+        //     const query = { _id: ObjectId(id) }
+        //     const options = {upsert : true};
+        //     const updateQuantity = {
+        //         $set:{
+        //             availableQuantity: newQuantity.availableQuantity
+        //         },
+        //     };
+        //     const result = await productCollection.updateOne(query,updateQuantity,options);
+        //     res.send({result, newQuantity});
+
+        // })
+
+        app.post('/review', async (req, res) =>{
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            res.send(result);
+        })
+
+        app.get('/review', async (req, res) => {
+            const review = await reviewCollection.find().toArray();
+            res.send(review);
         })
 
         app.delete('/product/:id', async (req, res) => {
