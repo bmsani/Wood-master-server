@@ -66,7 +66,7 @@ async function run() {
         });
 
         // passed
-        app.get('/singleUser', verifyJWT, async (req,res) => {
+        app.get('/singleUser', async (req,res) => {
             const email = req.query.email;
             const query = {email: email}
             const user = await userCollection.find(query).toArray()
@@ -199,9 +199,10 @@ async function run() {
         })
 
         // passed
-        app.get('/order', verifyJWT, async (req, res) => {
+        app.get('/userOrder', async (req, res) => {
             const email = req.query.email
             const query = {email: email}
+            JSON.stringify(query)
             const orders = await orderCollection.find(query).toArray();
             res.send(orders);
         })
