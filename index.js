@@ -6,6 +6,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const res = require('express/lib/response');
 const port = process.env.PORT || '5000';
 const app = express();
+const stripe = require('stripe')(process.env.stripe_secret_key)
 
 app.use(cors());
 app.use(express.json());
@@ -52,6 +53,17 @@ async function run() {
             const users = await userCollection.find().toArray();
             res.send(users)
         })
+
+        app.post('/create-payment-intent', verifyJWT, async (req,res) => {
+            const {price} = req.body;
+            const amount = price * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types:['card']
+            })
+            res.send({clientSecret: paymentIntent.client_secret})
+        });
 
         // passed
         app.get('/singleUser', verifyJWT, async (req,res) => {
@@ -123,6 +135,20 @@ async function run() {
             const result = await orderCollection.updateOne(query,updateProduct,options);
             res.send(result);
         })
+
+        app.patch('/order/:id', verifyJWT, async(req,res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const query = { _id: ObjectId(id) };
+            const updateDoc = {
+                $set:{
+                    paymentStatus: true,
+                    transectionId: payment.transectionId
+                }
+            }
+            const paidOrder = await orderCollection.updateOne(query,updateDoc);
+            res.send(paidOrder);
+        })
     
         // passed
         app.post('/product', verifyJWT, verifyAdmin, async (req, res) =>{
@@ -173,7 +199,7 @@ async function run() {
         })
 
         // passed
-        app.get('/order', verifyJWT, verifyAdmin, async (req, res) => {
+        app.get('/order', verifyJWT, async (req, res) => {
             const email = req.query.email
             const query = {email: email}
             const orders = await orderCollection.find(query).toArray();
