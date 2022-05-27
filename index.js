@@ -199,7 +199,7 @@ async function run() {
         })
 
         // passed
-        app.get('/userOrder', async (req, res) => {
+        app.get('/userOrder', verifyJWT, async (req, res) => {
             const email = req.query.email
             const query = {email: email}
             JSON.stringify(query)
